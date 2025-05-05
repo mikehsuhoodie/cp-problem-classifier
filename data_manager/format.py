@@ -1,0 +1,106 @@
+#
+# This code maps dataset from huggingface to desired format for training
+#
+
+import pandas as pd
+import os
+import ast
+
+from utils import get_dataset_filepath, convert_codeforces_labels, convert_leetcode_labels
+
+class Formatter:
+    def __init__(self, dataset_name):
+        self.dataset_name = dataset_name
+
+    def format(self):
+        dataset_filepath = get_dataset_filepath(self.dataset_name)
+
+        loaded_df = pd.read_csv(dataset_filepath)
+        loaded_df['labels'] = loaded_df['labels'].apply(ast.literal_eval)
+
+        loaded_df = loaded_df.apply(self._format_row, axis=1)
+        loaded_df = loaded_df.dropna()
+
+        return loaded_df
+
+    def _format_row(self, row):
+        raise NotImplementedError()
+
+
+class OpenR1CodeforcesFormatter(Formatter):
+    def __init__(self):
+        super().__init__("open-r1/codeforces")
+
+    def _format_row(self, row):
+        labels = convert_codeforces_labels(row['labels'])
+
+        if len(labels) == 0 or pd.isna(row['description']):
+            return None
+
+        description = self._get_description(row)
+
+        if not description:
+            return None
+
+        return pd.Series({
+            'source': 'codeforces',
+            'title': row['title'],
+            'description': description,
+            'labels': labels,
+        })
+
+    def _get_description(self, row):
+        result = row['description'].replace('\n', ' ')
+        fields = ['input_format', 'output_format', 'interaction_format', 'note']
+
+        for field in fields:
+            if not pd.isna(row[field]):
+                text = row[field].replace('\n', ' ')
+                result += f"\n{field} = {text}"
+
+        return result
+
+
+class KaysssLeetcodeFormatter(Formatter):
+    def __init__(self):
+        super().__init__("kaysss/leetcode-problem-detailed")
+
+    def _format_row(self, row):
+        labels = convert_leetcode_labels(row['labels'])
+
+        if len(labels) == 0 or pd.isna(row['description']):
+            return None
+
+        description = self._get_description(row)
+
+        return pd.Series({
+            'source': 'leetcode',
+            'title': row['title'],
+            'description': description,
+            'labels': labels,
+        })
+
+    def _get_description(self, row):
+        #
+        # TODO: parse html, and split data to description, input_format, output_format, constraints,
+        # TODO: scrap hints from the website
+        #
+        result = row['description'].replace('\n', ' ')
+
+        return result
+
+
+codeforcesFormatter = OpenR1CodeforcesFormatter()
+leetcodeFormatter = KaysssLeetcodeFormatter()
+
+dataset_df = pd.concat([
+    codeforcesFormatter.format(),
+    leetcodeFormatter.format()
+])
+
+dataset_filepath = get_dataset_filepath('problems', is_huggingface_dataset=False)
+
+if os.path.exists(dataset_filepath):
+    os.remove(dataset_filepath)
+
+dataset_df.to_csv(dataset_filepath, index=False)
