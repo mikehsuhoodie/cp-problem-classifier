@@ -122,11 +122,12 @@ dataset_df = pd.concat([
     leetcodeFormatter.format()
 ])
 
-dataset_filepath = get_dataset_filepath('problems', 'huggingface','jsonl')
+# dataset_filepath = get_dataset_filepath('problems', '','jsonl')
+dataset_filepath = get_dataset_filepath('problems', '','csv')
 
 if os.path.exists(dataset_filepath):
     os.remove(dataset_filepath)
 
-# dataset_df.to_csv(dataset_filepath, index=False)
-dataset_df.to_json(dataset_filepath, orient='records', lines=True)
+dataset_df.to_csv(dataset_filepath, index=False)
+# dataset_df.to_json(dataset_filepath, orient='records', lines=True)
 

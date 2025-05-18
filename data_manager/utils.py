@@ -6,7 +6,10 @@ from typing import List, Literal
 Source = Literal["huggingface", "scrapper", ""]
 
 def get_dataset_filepath(dataset_name: str, source: Source = "",extension: str='csv') -> str:
-    dest_dir = f"./dataset/{source}"
+    if source == "":
+        dest_dir = f"./dataset"
+    else:
+        dest_dir = f"./dataset/{source}"
 
     filename = dataset_name.replace('/', '_')
     os.makedirs(dest_dir, exist_ok=True)
