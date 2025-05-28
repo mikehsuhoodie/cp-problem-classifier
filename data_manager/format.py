@@ -20,8 +20,8 @@ class Formatter:
         dataset_filepath = get_dataset_filepath(self.dataset_name, self.source)
 
         loaded_df = pd.read_csv(dataset_filepath)
-        loaded_df['labels'] = loaded_df['labels'].apply(ast.literal_eval)
-
+        loaded_df['labels'] = loaded_df['labels'].apply(lambda x: list(set(ast.literal_eval(x))))
+        # print(loaded_df['labels'].head(5))
         loaded_df = loaded_df.apply(self._format_row, axis=1)
         loaded_df = loaded_df.dropna()
 
@@ -37,7 +37,7 @@ class OpenR1CodeforcesFormatter(Formatter):
 
     def _format_row(self, row):
         labels = convert_codeforces_labels(row['labels'])
-
+        labels = list(set(labels))
         if len(labels) == 0 or len(labels) > MAX_LABELS_COUNT:
             return None
 
@@ -74,7 +74,7 @@ class KaysssLeetcodeFormatter(Formatter):
 
     def _format_row(self, row):
         labels = convert_leetcode_labels(row['labels'])
-
+        labels= list(set(labels))
         if len(labels) == 0 or len(labels) > MAX_LABELS_COUNT:
             return None
 
