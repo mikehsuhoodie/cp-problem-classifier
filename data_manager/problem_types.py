@@ -286,7 +286,7 @@ leetcode_to_standard: Dict[LeetcodeProblemLabel, Optional[List[ProblemLabel]]] =
     "Binary Search": ["binary search"],
     "Database": None,
     "Matrix": ["matrices"],
-    "Tree": ["tree"],
+    "Tree": ["trees"],
     "Breadth-First Search": ["graphs"],
     "Bit Manipulation": ["bit manipulation"],
     "Two Pointers": ["two pointers"],
