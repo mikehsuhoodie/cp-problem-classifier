@@ -7,3 +7,7 @@ matplotlib
 scikit-learn
 transformers
 # pip install torch torchvision torchaudio
+
+# FastAPI
+fastapi 
+uvicorn
