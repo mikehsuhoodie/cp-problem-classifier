@@ -2,7 +2,7 @@
 # This code maps dataset from huggingface to desired format for training
 #
 from pathlib import Path
-
+from bs4 import BeautifulSoup
 import pandas as pd
 import ast
 
@@ -100,15 +100,12 @@ class KaysssLeetcodeFormatter(Formatter):
         })
 
     def _get_description(self, row):
-        #
-        # TODO: parse html, and split data to description, input_format, output_format, constraints,
-        # TODO: scrap hints from the website
-        #
-
         if pd.isna(row['description']):
             return None
 
         result = row['description'].replace('\n', ' ')
+        result = BeautifulSoup(result, "html.parser").get_text()
+        result = " ".join(result.split())
 
         return result
 
